@@ -3,6 +3,14 @@ class HTTPError(Exception):
 	def __init__(self,code,message=None):
 		if message == None:
 			message = {
+				400: '''\
+				400 Bad Request
+
+				   The 400 (Bad Request) status code indicates that the server cannot or
+				   will not process the request due to something that is perceived to be
+				   a client error (e.g., malformed request syntax, invalid request
+				   message framing, or deceptive request routing).
+				''',
 				404: '''\
 				404 Not Found
 

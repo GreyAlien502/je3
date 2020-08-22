@@ -15,10 +15,11 @@ def handler( handle, connection_timeout=None ):
 
 	class Handler(BaseHTTPRequestHandler):
 		timeout = connection_timeout
-		method = None
 		def __getattr__(self,name):
-			self.method = re.match(r'do_(.*)',name).group(1) # raises AttributeError if no match
-			return lambda: send(self,**handle(self))
+			if re.match(r'do_(.*)',name):
+				return lambda: send(self,**handle(self))
+			else:
+				raise AttributeError()
 	return Handler
 
 def response(body=b'',code=200,headers={}):
@@ -41,17 +42,16 @@ import cgi
 def getBody(request):
 	return request.rfile.read(int(request.headers['Content-Length']))
 def query(request):
-	if request.command == 'GET':
-		return dict(parse_qsl(urlparse(request.path).query))
-	else:
-		return cgi.FieldStorage(
-			request.rfile,
-			request.headers,
-			environ={
-				'REQUEST_METHOD':request.command,
-			},
-			keep_blank_values=1,
-		)
+	return dict(parse_qsl(urlparse(request.path).query))
+def body(request):
+	return cgi.FieldStorage(
+		request.rfile,
+		request.headers,
+		environ={
+			'REQUEST_METHOD':request.command,
+		},
+		keep_blank_values=1,
+	)
 import mimetypes
 mimetypes.init()
 def static(path):

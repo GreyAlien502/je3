@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import re
+import copy
 
 def handler( handle, connection_timeout=None ):
 	def send(request,code,headers,body):
@@ -21,22 +22,23 @@ def handler( handle, connection_timeout=None ):
 	return Handler
 
 def response(body=b'',code=200,headers={}):
-	defaultHeaders = {
+	defaults = {
 		'Content-type': 'text/html; charset=utf-8',
 		'Content-Length': len(body),
 	}
-	defaultHeaders.update(headers)
-
+	headers = copy.copy(headers)
+	for key,value in defaults.items():
+		if not key in headers:
+			headers[key] = value
 	return {
 		'code':code,
-		'headers': defaultHeaders,
+		'headers': headers,
 		'body': body,
 	}
 
 from urllib.parse import urlparse, parse_qsl
 import cgi
 def getBody(request):
-	print(request.headers)
 	return request.rfile.read(int(request.headers['Content-Length']))
 def query(request):
 	if request.command == 'GET':

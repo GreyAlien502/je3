@@ -1,4 +1,7 @@
+import traceback
+
 from .server import response
+
 class HTTPError(Exception):
 	def __init__(self,code,message=None):
 		if message == None:
@@ -60,7 +63,7 @@ def handle_errors(function):
 		except HTTPError as e:
 			return e.response()
 		except Exception as e:
-			print(str(e))
+			traceback.print_exc()
 			return HTTPError(500).response()
 	return wrapped
 
